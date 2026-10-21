@@ -1,0 +1,86 @@
+{
+  "id": "darktrace",
+  "name": "Darktrace",
+  "name_en": "Darktrace",
+  "version": "1.0.0",
+  "description": "Detección de amenazas en la red con Darktrace: consultar modelos, obtener alertas (model breaches), consultar incidentes de Cyber AI Analyst y reconocer alertas",
+  "description_en": "Network threat detection with Darktrace: query models, get alerts (model breaches), query Cyber AI Analyst incidents and acknowledge alerts",
+  "icon": "icon.svg",
+  "category": "security",
+  "category_en": "security",
+  "keywords": [
+    "darktrace",
+    "ndr",
+    "amenazas",
+    "threats",
+    "model breach",
+    "alertas",
+    "alerts",
+    "incidentes",
+    "ai analyst",
+    "ciberseguridad"
+  ],
+  "library": {
+    "package": "ruvic-darktrace-connector",
+    "install": "pip install git+https://github.com/RuvicDev/CON-084-Darktrace.git#subdirectory=lib",
+    "import_name": "ruvic_darktrace_connector"
+  },
+  "auth_modes": [
+    {
+      "id": "api_tokens",
+      "label": "Tokens de API (público + privado)",
+      "fields": [
+        {
+          "key": "base_url",
+          "label": "URL del appliance de Darktrace",
+          "type": "text",
+          "required": true,
+          "placeholder": "https://darktrace.miempresa.com",
+          "help_text": "URL del Threat Visualizer o de la instancia cloud, sin barra final"
+        },
+        {
+          "key": "public_token",
+          "label": "Token público",
+          "type": "text",
+          "required": true,
+          "help_text": "System Config → Settings → API Token → New"
+        },
+        {
+          "key": "private_token",
+          "label": "Token privado",
+          "type": "password",
+          "secret": true,
+          "required": true,
+          "help_text": "Se muestra una sola vez al crear el par de tokens"
+        },
+        {
+          "key": "verify_ssl",
+          "label": "Verificar certificado SSL",
+          "type": "boolean",
+          "required": false,
+          "default": "true",
+          "help_text": "Desactívalo solo si el equipo usa un certificado autofirmado en una red de confianza"
+        },
+        {
+          "key": "connect_timeout",
+          "label": "Timeout de conexión (segundos)",
+          "type": "number",
+          "required": false,
+          "default": "15"
+        }
+      ]
+    }
+  ],
+  "env_prefix": "RUVIC_DARKTRACE_",
+  "operations": [
+    "models.list",
+    "alerts.list",
+    "incidents.list",
+    "alerts.acknowledge"
+  ],
+  "test_connection": true,
+  "docs": {
+    "skill": "SKILL.md",
+    "permissions_note": "Los tokens de API heredan los permisos configurados al crearlos en System Config → Settings → API Token. Restringe el par de tokens a un usuario/rol con acceso de lectura a model breaches, modelos y Cyber AI Analyst, más el permiso de reconocer (acknowledge) breaches. No uses tokens con acceso de administración del sistema."
+  }
+}

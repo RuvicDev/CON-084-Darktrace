@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="doc_title">Conector Darktrace — Guía de configuración | Ruvic</title>
+  <link rel="stylesheet" href="assets/ruvic.css">
+</head>
+<body class="guide">
+<div class="guide-shell">
+<main class="ruvic-container">
+  <nav class="ruvic-toc" aria-label="Índice">
+    <h2 data-i18n="toc_title">Contenido</h2>
+    <ol>
+      <li><a href="#que-es" data-i18n="toc.que_es">¿Qué es y para qué sirve?</a></li>
+      <li><a href="#prerrequisitos" data-i18n="toc.prerrequisitos">Prerrequisitos</a></li>
+      <li><a href="#configuracion-fabricante" data-i18n="toc.configuracion_fabricante">Configuración en el fabricante</a></li>
+      <li><a href="#permisos" data-i18n="toc.permisos">Permisos requeridos</a></li>
+      <li><a href="#configuracion-ruvic" data-i18n="toc.configuracion_ruvic">Configuración en Ruvic</a></li>
+      <li><a href="#verificacion" data-i18n="toc.verificacion">Verificación</a></li>
+      <li><a href="#solucion-problemas" data-i18n="toc.solucion_problemas">Solución de problemas</a></li>
+      <li><a href="#faq-seguridad" data-i18n="toc.faq_seguridad">Preguntas frecuentes y notas de seguridad</a></li>
+    </ol>
+  </nav>
+
+  <h1 data-i18n="guide_title">Conector Darktrace — Guía de configuración</h1>
+  <p class="guide-updated" data-i18n="guide_updated">Última actualización: octubre 2026</p>
+
+  <section id="que-es">
+    <h2 data-i18n="section.que_es">¿Qué es y para qué sirve?</h2>
+    <p data-i18n="que_es.body">El conector Darktrace permite que el agente de Ruvic consulte las detecciones de amenazas de tu red: modelos, alertas (model breaches) e incidentes de Cyber AI Analyst, y reconozca alertas ya revisadas. Puedes pedirle cosas como:</p>
+    <ul>
+      <li data-i18n="que_es.example1">"¿Qué alertas de Darktrace con puntaje mayor a 0.8 hubo en las últimas 12 horas?"</li>
+      <li data-i18n="que_es.example2">"Resúmeme los incidentes de AI Analyst de esta semana."</li>
+      <li data-i18n="que_es.example3">"Reconoce la alerta 4521, ya la revisamos."</li>
+    </ul>
+    <p data-i18n="que_es.ops_intro">Operaciones soportadas:</p>
+    <table>
+      <thead><tr><th data-i18n="table.operacion">Operación</th><th data-i18n="table.que_hace">Qué hace</th></tr></thead>
+      <tbody>
+        <tr><td><code>models.list</code></td><td data-i18n="op.1">Lista los modelos de detección y si están activos</td></tr>
+        <tr><td><code>alerts.list</code></td><td data-i18n="op.2">Obtiene model breaches por ventana de tiempo y puntaje mínimo</td></tr>
+        <tr><td><code>incidents.list</code></td><td data-i18n="op.3">Consulta incidentes de Cyber AI Analyst</td></tr>
+        <tr><td><code>alerts.acknowledge</code></td><td data-i18n="op.4">Marca una alerta como reconocida (escribe)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-warning">
+      <span class="callout-title" data-i18n="callout.main.title">Reconocer una alerta cambia lo que ve tu equipo</span>
+      <span data-i18n="callout.main.body">Las consultas son de solo lectura. Reconocer una alerta la marca como revisada en Darktrace para todo el equipo de seguridad.</span>
+    </div>
+  </section>
+
+  <section id="prerrequisitos">
+    <h2 data-i18n="section.prerrequisitos">Prerrequisitos</h2>
+    <ul>
+      <li data-i18n="prereq.1">Un appliance de Darktrace o una instancia cloud con la API habilitada.</li>
+      <li data-i18n="prereq.2">Un usuario con permiso de configuración del sistema para crear tokens de API.</li>
+      <li data-i18n="prereq.3">Conectividad HTTPS desde la plataforma Ruvic hasta el appliance.</li>
+      <li data-i18n="prereq.4">Reloj sincronizado: la firma incluye la fecha y Darktrace rechaza diferencias grandes.</li>
+    </ul>
+  </section>
+
+  <section id="configuracion-fabricante">
+    <h2 data-i18n="section.configuracion_fabricante">Configuración en el fabricante</h2>
+    <p data-i18n="fabricante.intro">Vas a crear un par de tokens de API (público y privado) en el Threat Visualizer.</p>
+    <ol class="ruvic-steps">
+      <li>
+        <strong data-i18n="step.1.label">Abre la configuración de tokens.</strong>
+        <p data-i18n="step.1.body">En el Threat Visualizer ve a <strong>System Config → Settings → API Token</strong> y pulsa <strong>New</strong>.</p>
+        <div class="screenshot-placeholder" data-i18n="img.step1.placeholder">[ Captura: creación del token de API en System Config — reemplazar por assets/img/darktrace-token.png ]</div>
+      </li>
+      <li>
+        <strong data-i18n="step.2.label">Limita los permisos.</strong>
+        <p data-i18n="step.2.body">Asocia el token a un usuario o rol con lectura de model breaches, modelos y Cyber AI Analyst, más reconocer breaches. Evita permisos de administración.</p>
+      </li>
+      <li>
+        <strong data-i18n="step.3.label">Copia ambos tokens.</strong>
+        <p data-i18n="step.3.body">Guarda el <strong>token público</strong> y el <strong>token privado</strong>. El privado solo se muestra una vez.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="permisos">
+    <h2 data-i18n="section.permisos">Permisos requeridos</h2>
+    <p data-i18n="permisos.intro">Principio de mínimo privilegio: el par de tokens solo necesita lo siguiente.</p>
+    <table>
+      <thead><tr><th data-i18n="table.permiso">Permiso</th><th data-i18n="table.para_que">Para qué lo usa el conector</th></tr></thead>
+      <tbody>
+        <tr><td><code>Model breaches (lectura)</code></td><td data-i18n="perm.1.desc">Obtener alertas con <code>get_alerts</code></td></tr>
+        <tr><td><code>Models (lectura)</code></td><td data-i18n="perm.2.desc">Listar modelos con <code>list_models</code></td></tr>
+        <tr><td><code>Cyber AI Analyst (lectura)</code></td><td data-i18n="perm.3.desc">Consultar incidentes con <code>list_incidents</code></td></tr>
+        <tr><td><code>Acknowledge breaches</code></td><td data-i18n="perm.4.desc">Reconocer alertas con <code>acknowledge_alert</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="configuracion-ruvic">
+    <h2 data-i18n="section.configuracion_ruvic">Configuración en Ruvic</h2>
+    <p data-i18n="ruvic.intro">Entra a <strong>Settings → Conectores</strong>, busca la tarjeta <strong>Darktrace</strong> y pulsa <strong>Configurar</strong>. Diligencia el formulario con los valores de la sección anterior:</p>
+    <table>
+      <thead><tr><th data-i18n="table.campo">Campo del formulario</th><th data-i18n="table.valor">Valor</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n="field.base_url">URL del appliance de Darktrace</td><td data-i18n="field.base_url.desc">URL del Threat Visualizer o de la instancia cloud, ej. <code>https://darktrace.miempresa.com</code></td></tr>
+        <tr><td data-i18n="field.public_token">Token público</td><td data-i18n="field.public_token.desc">Token público del par creado</td></tr>
+        <tr><td data-i18n="field.private_token">Token privado</td><td data-i18n="field.private_token.desc">Token privado. Se guarda cifrado y no se vuelve a mostrar</td></tr>
+        <tr><td data-i18n="field.verify_ssl">Verificar certificado SSL</td><td data-i18n="field.verify_ssl.desc">Actívalo siempre, salvo appliances con certificado autofirmado en redes de confianza</td></tr>
+        <tr><td data-i18n="field.connect_timeout">Timeout de conexión (segundos)</td><td data-i18n="field.connect_timeout.desc">Opcional; <code>15</code> segundos por defecto</td></tr>
+      </tbody>
+    </table>
+    <p data-i18n="ruvic.save">Guarda y pulsa <strong>Probar conexión</strong>: la plataforma valida las credenciales y el acceso.</p>
+    <div class="screenshot-placeholder" data-i18n="img.formulario.placeholder">[ Captura: formulario del conector Darktrace en Settings → Conectores — reemplazar por assets/img/darktrace-form.png ]</div>
+  </section>
+
+  <section id="verificacion">
+    <h2 data-i18n="section.verificacion">Verificación</h2>
+    <ol class="ruvic-steps">
+      <li>
+        <strong data-i18n="verif.1.label">Test de conexión exitoso.</strong>
+        <p data-i18n="verif.1.body">El botón <em>Probar conexión</em> debe responder con éxito y la tarjeta debe quedar en estado <strong>Configurado</strong>.</p>
+      </li>
+      <li>
+        <strong data-i18n="verif.2.label">Prueba mínima con el agente.</strong>
+        <p data-i18n="verif.2.body">Abre una conversación nueva y pídele:</p>
+        <blockquote data-i18n="verif.2.prompt">"¿Cuántas alertas de Darktrace con puntaje mayor a 0.5 hubo hoy?"</blockquote>
+        <p data-i18n="verif.2.result">El agente debe responder con alertas reales del appliance. No le pidas reconocer alertas durante la prueba.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="solucion-problemas">
+    <h2 data-i18n="section.solucion_problemas">Solución de problemas</h2>
+    <table>
+      <thead><tr><th data-i18n="table.sintoma">Mensaje / síntoma</th><th data-i18n="table.causa">Causa probable y solución</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n="trouble.1.symptom">"Tokens de API inválidos"</td><td data-i18n="trouble.1.fix">El token público o el privado están mal copiados, o el par fue eliminado. Crea uno nuevo.</td></tr>
+        <tr><td data-i18n="trouble.2.symptom">"Darktrace rechazó la fecha de la firma"</td><td data-i18n="trouble.2.fix">El reloj del runtime y el del appliance difieren. Sincroniza NTP en el appliance.</td></tr>
+        <tr><td data-i18n="trouble.3.symptom">"Los tokens no tienen permiso"</td><td data-i18n="trouble.3.fix">Darktrace redirigió a /403: amplía los permisos del usuario o rol del token.</td></tr>
+        <tr><td data-i18n="trouble.4.symptom">"Error de certificado SSL"</td><td data-i18n="trouble.4.fix">El appliance usa un certificado autofirmado. Instala uno válido o desactiva la verificación en una red de confianza.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="faq-seguridad">
+    <h2 data-i18n="section.faq_seguridad">Preguntas frecuentes y notas de seguridad</h2>
+    <h3 data-i18n="faq.1.q">¿El agente puede cambiar modelos o bloquear tráfico?</h3>
+    <p data-i18n="faq.1.a">No. Solo consulta y reconoce alertas. No toca modelos, respuestas autónomas (RESPOND) ni configuración.</p>
+
+    <h3 data-i18n="faq.2.q">¿Qué hago si el token privado se filtra?</h3>
+    <p data-i18n="faq.2.a">Elimina el par en System Config → API Token, crea uno nuevo y actualízalo en el formulario.</p>
+
+    <h3 data-i18n="faq.3.q">¿Dónde quedan guardados los tokens?</h3>
+    <p data-i18n="faq.3.a">Como secretos cifrados en la plataforma. La interfaz no vuelve a mostrarlos.</p>
+
+  </section>
+
+</main>
+</div>
+
+<script>
+  const I18N = {
+  "es": {
+    "doc_title": "Conector Darktrace — Guía de configuración | Ruvic",
+    "toc_title": "Contenido",
+    "toc.que_es": "¿Qué es y para qué sirve?",
+    "toc.prerrequisitos": "Prerrequisitos",
+    "toc.configuracion_fabricante": "Configuración en el fabricante",
+    "toc.permisos": "Permisos requeridos",
+    "toc.configuracion_ruvic": "Configuración en Ruvic",
+    "toc.verificacion": "Verificación",
+    "toc.solucion_problemas": "Solución de problemas",
+    "toc.faq_seguridad": "Preguntas frecuentes y notas de seguridad",
+    "guide_title": "Conector Darktrace — Guía de configuración",
+    "guide_updated": "Última actualización: octubre 2026",
+    "section.que_es": "¿Qué es y para qué sirve?",
+    "que_es.body": "El conector Darktrace permite que el agente de Ruvic consulte las detecciones de amenazas de tu red: modelos, alertas (model breaches) e incidentes de Cyber AI Analyst, y reconozca alertas ya revisadas. Puedes pedirle cosas como:",
+    "que_es.example1": "\"¿Qué alertas de Darktrace con puntaje mayor a 0.8 hubo en las últimas 12 horas?\"",
+    "que_es.example2": "\"Resúmeme los incidentes de AI Analyst de esta semana.\"",
+    "que_es.example3": "\"Reconoce la alerta 4521, ya la revisamos.\"",
+    "que_es.ops_intro": "Operaciones soportadas:",
+    "table.operacion": "Operación",
+    "table.que_hace": "Qué hace",
+    "op.1": "Lista los modelos de detección y si están activos",
+    "op.2": "Obtiene model breaches por ventana de tiempo y puntaje mínimo",
+    "op.3": "Consulta incidentes de Cyber AI Analyst",
+    "op.4": "Marca una alerta como reconocida (escribe)",
+    "callout.main.title": "Reconocer una alerta cambia lo que ve tu equipo",
+    "callout.main.body": "Las consultas son de solo lectura. Reconocer una alerta la marca como revisada en Darktrace para todo el equipo de seguridad.",
+    "section.prerrequisitos": "Prerrequisitos",
+    "prereq.1": "Un appliance de Darktrace o una instancia cloud con la API habilitada.",
+    "prereq.2": "Un usuario con permiso de configuración del sistema para crear tokens de API.",
+    "prereq.3": "Conectividad HTTPS desde la plataforma Ruvic hasta el appliance.",
+    "prereq.4": "Reloj sincronizado: la firma incluye la fecha y Darktrace rechaza diferencias grandes.",
+    "section.configuracion_fabricante": "Configuración en el fabricante",
+    "fabricante.intro": "Vas a crear un par de tokens de API (público y privado) en el Threat Visualizer.",
+    "step.1.label": "Abre la configuración de tokens.",
+    "step.1.body": "En el Threat Visualizer ve a <strong>System Config → Settings → API Token</strong> y pulsa <strong>New</strong>.",
+    "img.step1.placeholder": "[ Captura: creación del token de API en System Config — reemplazar por assets/img/darktrace-token.png ]",
+    "step.2.label": "Limita los permisos.",
+    "step.2.body": "Asocia el token a un usuario o rol con lectura de model breaches, modelos y Cyber AI Analyst, más reconocer breaches. Evita permisos de administración.",
+    "step.3.label": "Copia ambos tokens.",
+    "step.3.body": "Guarda el <strong>token público</strong> y el <strong>token privado</strong>. El privado solo se muestra una vez.",
+    "section.permisos": "Permisos requeridos",
+    "permisos.intro": "Principio de mínimo privilegio: el par de tokens solo necesita lo siguiente.",
+    "table.permiso": "Permiso",
+    "table.para_que": "Para qué lo usa el conector",
+    "perm.1.desc": "Obtener alertas con <code>get_alerts</code>",
+    "perm.2.desc": "Listar modelos con <code>list_models</code>",
+    "perm.3.desc": "Consultar incidentes con <code>list_incidents</code>",
+    "perm.4.desc": "Reconocer alertas con <code>acknowledge_alert</code>",
+    "section.configuracion_ruvic": "Configuración en Ruvic",
+    "ruvic.intro": "Entra a <strong>Settings → Conectores</strong>, busca la tarjeta <strong>Darktrace</strong> y pulsa <strong>Configurar</strong>. Diligencia el formulario con los valores de la sección anterior:",
+    "table.campo": "Campo del formulario",
+    "table.valor": "Valor",
+    "field.base_url": "URL del appliance de Darktrace",
+    "field.base_url.desc": "URL del Threat Visualizer o de la instancia cloud, ej. <code>https://darktrace.miempresa.com</code>",
+    "field.public_token": "Token público",
+    "field.public_token.desc": "Token público del par creado",
+    "field.private_token": "Token privado",
+    "field.private_token.desc": "Token privado. Se guarda cifrado y no se vuelve a mostrar",
+    "field.verify_ssl": "Verificar certificado SSL",
+    "field.verify_ssl.desc": "Actívalo siempre, salvo appliances con certificado autofirmado en redes de confianza",
+    "field.connect_timeout": "Timeout de conexión (segundos)",
+    "field.connect_timeout.desc": "Opcional; <code>15</code> segundos por defecto",
+    "ruvic.save": "Guarda y pulsa <strong>Probar conexión</strong>: la plataforma valida las credenciales y el acceso.",
+    "img.formulario.placeholder": "[ Captura: formulario del conector Darktrace en Settings → Conectores — reemplazar por assets/img/darktrace-form.png ]",
+    "section.verificacion": "Verificación",
+    "verif.1.label": "Test de conexión exitoso.",
+    "verif.1.body": "El botón <em>Probar conexión</em> debe responder con éxito y la tarjeta debe quedar en estado <strong>Configurado</strong>.",
+    "verif.2.label": "Prueba mínima con el agente.",
+    "verif.2.body": "Abre una conversación nueva y pídele:",
+    "verif.2.prompt": "\"¿Cuántas alertas de Darktrace con puntaje mayor a 0.5 hubo hoy?\"",
+    "verif.2.result": "El agente debe responder con alertas reales del appliance. No le pidas reconocer alertas durante la prueba.",
+    "section.solucion_problemas": "Solución de problemas",
+    "table.sintoma": "Mensaje / síntoma",
+    "table.causa": "Causa probable y solución",
+    "trouble.1.symptom": "\"Tokens de API inválidos\"",
+    "trouble.1.fix": "El token público o el privado están mal copiados, o el par fue eliminado. Crea uno nuevo.",
+    "trouble.2.symptom": "\"Darktrace rechazó la fecha de la firma\"",
+    "trouble.2.fix": "El reloj del runtime y el del appliance difieren. Sincroniza NTP en el appliance.",
+    "trouble.3.symptom": "\"Los tokens no tienen permiso\"",
+    "trouble.3.fix": "Darktrace redirigió a /403: amplía los permisos del usuario o rol del token.",
+    "trouble.4.symptom": "\"Error de certificado SSL\"",
+    "trouble.4.fix": "El appliance usa un certificado autofirmado. Instala uno válido o desactiva la verificación en una red de confianza.",
+    "section.faq_seguridad": "Preguntas frecuentes y notas de seguridad",
+    "faq.1.q": "¿El agente puede cambiar modelos o bloquear tráfico?",
+    "faq.1.a": "No. Solo consulta y reconoce alertas. No toca modelos, respuestas autónomas (RESPOND) ni configuración.",
+    "faq.2.q": "¿Qué hago si el token privado se filtra?",
+    "faq.2.a": "Elimina el par en System Config → API Token, crea uno nuevo y actualízalo en el formulario.",
+    "faq.3.q": "¿Dónde quedan guardados los tokens?",
+    "faq.3.a": "Como secretos cifrados en la plataforma. La interfaz no vuelve a mostrarlos.",
+  },
+  "en": {
+    "doc_title": "Darktrace Connector — Setup Guide | Ruvic",
+    "toc_title": "Contents",
+    "toc.que_es": "What is it and what is it for?",
+    "toc.prerrequisitos": "Prerequisites",
+    "toc.configuracion_fabricante": "Vendor-side setup",
+    "toc.permisos": "Required permissions",
+    "toc.configuracion_ruvic": "Setup in Ruvic",
+    "toc.verificacion": "Verification",
+    "toc.solucion_problemas": "Troubleshooting",
+    "toc.faq_seguridad": "FAQ and security notes",
+    "guide_title": "Darktrace Connector — Setup Guide",
+    "guide_updated": "Last updated: October 2026",
+    "section.que_es": "What is it and what is it for?",
+    "que_es.body": "The Darktrace connector lets the Ruvic agent query your network threat detections: models, alerts (model breaches) and Cyber AI Analyst incidents, and acknowledge reviewed alerts. You can ask things like:",
+    "que_es.example1": "\"Which Darktrace alerts scored above 0.8 in the last 12 hours?\"",
+    "que_es.example2": "\"Summarize this week's AI Analyst incidents.\"",
+    "que_es.example3": "\"Acknowledge alert 4521, we already reviewed it.\"",
+    "que_es.ops_intro": "Supported operations:",
+    "table.operacion": "Operation",
+    "table.que_hace": "What it does",
+    "op.1": "Lists detection models and whether they're active",
+    "op.2": "Gets model breaches by time window and minimum score",
+    "op.3": "Queries Cyber AI Analyst incidents",
+    "op.4": "Marks an alert as acknowledged (writes)",
+    "callout.main.title": "Acknowledging an alert changes what your team sees",
+    "callout.main.body": "Queries are read-only. Acknowledging an alert marks it as reviewed in Darktrace for the whole security team.",
+    "section.prerrequisitos": "Prerequisites",
+    "prereq.1": "A Darktrace appliance or cloud instance with the API enabled.",
+    "prereq.2": "A user with system configuration permission to create API tokens.",
+    "prereq.3": "HTTPS connectivity from the Ruvic platform to the appliance.",
+    "prereq.4": "Synchronized clock: the signature includes the date and Darktrace rejects large drifts.",
+    "section.configuracion_fabricante": "Vendor-side setup",
+    "fabricante.intro": "You will create an API token pair (public and private) in the Threat Visualizer.",
+    "step.1.label": "Open the token settings.",
+    "step.1.body": "In the Threat Visualizer go to <strong>System Config → Settings → API Token</strong> and click <strong>New</strong>.",
+    "img.step1.placeholder": "[ Screenshot: API token creation in System Config — replace with assets/img/darktrace-token.png ]",
+    "step.2.label": "Restrict permissions.",
+    "step.2.body": "Tie the token to a user or role with read access to model breaches, models and Cyber AI Analyst, plus acknowledging breaches. Avoid admin permissions.",
+    "step.3.label": "Copy both tokens.",
+    "step.3.body": "Save the <strong>public token</strong> and the <strong>private token</strong>. The private one is shown only once.",
+    "section.permisos": "Required permissions",
+    "permisos.intro": "Least privilege: the token pair only needs the following.",
+    "table.permiso": "Permission",
+    "table.para_que": "What the connector uses it for",
+    "perm.1.desc": "Get alerts with <code>get_alerts</code>",
+    "perm.2.desc": "List models with <code>list_models</code>",
+    "perm.3.desc": "Query incidents with <code>list_incidents</code>",
+    "perm.4.desc": "Acknowledge alerts with <code>acknowledge_alert</code>",
+    "section.configuracion_ruvic": "Setup in Ruvic",
+    "ruvic.intro": "Go to <strong>Settings → Connectors</strong>, find the <strong>Darktrace</strong> card and click <strong>Configure</strong>. Fill in the form with the values from the previous section:",
+    "table.campo": "Form field",
+    "table.valor": "Value",
+    "field.base_url": "Darktrace appliance URL",
+    "field.base_url.desc": "Threat Visualizer or cloud instance URL, e.g. <code>https://darktrace.miempresa.com</code>",
+    "field.public_token": "Public token",
+    "field.public_token.desc": "Public token of the created pair",
+    "field.private_token": "Private token",
+    "field.private_token.desc": "Private token. Stored encrypted and never shown again",
+    "field.verify_ssl": "Verify SSL certificate",
+    "field.verify_ssl.desc": "Always on, except appliances with self-signed certificates on trusted networks",
+    "field.connect_timeout": "Connection timeout (seconds)",
+    "field.connect_timeout.desc": "Optional; <code>15</code> seconds by default",
+    "ruvic.save": "Save and click <strong>Test connection</strong>: the platform validates the credentials and access.",
+    "img.formulario.placeholder": "[ Screenshot: Darktrace connector form in Settings → Connectors — replace with assets/img/darktrace-form.png ]",
+    "section.verificacion": "Verification",
+    "verif.1.label": "Successful connection test.",
+    "verif.1.body": "The <em>Test connection</em> button must succeed and the card must show <strong>Configured</strong>.",
+    "verif.2.label": "Minimal test with the agent.",
+    "verif.2.body": "Open a new conversation and ask:",
+    "verif.2.prompt": "\"How many Darktrace alerts scored above 0.5 today?\"",
+    "verif.2.result": "The agent should answer with real alerts from the appliance. Don't ask it to acknowledge alerts during the test.",
+    "section.solucion_problemas": "Troubleshooting",
+    "table.sintoma": "Message / symptom",
+    "table.causa": "Likely cause and fix",
+    "trouble.1.symptom": "\"Invalid API tokens\"",
+    "trouble.1.fix": "The public or private token is mistyped, or the pair was deleted. Create a new one.",
+    "trouble.2.symptom": "\"Darktrace rejected the signature date\"",
+    "trouble.2.fix": "The runtime and appliance clocks differ. Sync NTP on the appliance.",
+    "trouble.3.symptom": "\"The tokens lack permission\"",
+    "trouble.3.fix": "Darktrace redirected to /403: extend the token user's or role's permissions.",
+    "trouble.4.symptom": "\"SSL certificate error\"",
+    "trouble.4.fix": "The appliance uses a self-signed certificate. Install a valid one or disable verification on a trusted network.",
+    "section.faq_seguridad": "FAQ and security notes",
+    "faq.1.q": "Can the agent change models or block traffic?",
+    "faq.1.a": "No. It only queries and acknowledges alerts. It doesn't touch models, autonomous response (RESPOND) or settings.",
+    "faq.2.q": "What if the private token leaks?",
+    "faq.2.a": "Delete the pair in System Config → API Token, create a new one and update the form.",
+    "faq.3.q": "Where are the tokens stored?",
+    "faq.3.a": "As encrypted secrets on the platform. The interface never shows them again.",
+  },
+  };
+  /* El portal aplica el idioma del usuario (localStorage ruvic-docs-lang)
+     y actualiza [data-i18n], [data-i18n-placeholder] y [data-i18n-alt]. */
+</script>
+</body>
+</html>
